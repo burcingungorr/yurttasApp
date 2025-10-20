@@ -8,7 +8,7 @@ const Title = ({title}) => {
     </View>
   )
 }
-
+//denemek için
 export default Title
 
 const styles = StyleSheet.create({
