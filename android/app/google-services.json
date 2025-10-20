@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1075388626097",
+    "project_id": "yurttas-e7be1",
+    "storage_bucket": "yurttas-e7be1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1075388626097:android:97239d7106adec87dc5e90",
+        "android_client_info": {
+          "package_name": "com.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1MKtOkTlYzo8R2lbBIwlkV7LRWNiB5Ec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
