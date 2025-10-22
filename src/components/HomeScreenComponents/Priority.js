@@ -10,7 +10,7 @@ const Priority = ({ level, checked, onPress }) => {
   } else if (level === 'second') {
     iconColor = '#f48022';  
   } else if (level === 'third') {
-    iconColor = 'yellow';  
+    iconColor = '#007AFF';  
   }
 
   const iconName = checked ? 'checkbox-marked' : 'square';  

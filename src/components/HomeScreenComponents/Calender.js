@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 
-LocaleConfig.locales['tr'] = {
+LocaleConfig.locales.tr = {
   monthNames: [
     'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
     'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 10,
     marginLeft:5,
+    paddingTop:30
     
   },
   dateContainer: {

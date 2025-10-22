@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, SafeArea
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
+import LottieView from 'lottie-react-native'; 
 
 const MyTasks = () => {
   const [task, setTask] = useState('');
@@ -29,9 +30,8 @@ const MyTasks = () => {
     return () => unsubscribe(); 
   }, [userId]);
 
-
   const addTask = async () => {
-    if (!userId) return;
+    if (!userId || !task.trim()) return;
 
     const newTask = {
       task,
@@ -51,24 +51,22 @@ const MyTasks = () => {
     }
   };
 
-
   const toggleCompletion = async (taskId, currentState) => {
-      await firestore()
-        .collection('users')
-        .doc(userId)
-        .collection('Mytasks')
-        .doc(taskId)
-        .update({ completed: !currentState });
+    await firestore()
+      .collection('users')
+      .doc(userId)
+      .collection('Mytasks')
+      .doc(taskId)
+      .update({ completed: !currentState });
   };
 
-
   const deleteTask = async (taskId) => {
-      await firestore()
-        .collection('users')
-        .doc(userId)
-        .collection('Mytasks')
-        .doc(taskId)
-        .delete();
+    await firestore()
+      .collection('users')
+      .doc(userId)
+      .collection('Mytasks')
+      .doc(taskId)
+      .delete();
   };
 
   return (
@@ -87,29 +85,42 @@ const MyTasks = () => {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={tasks}
-        keyExtractor={item => item.id}
-        scrollEnabled={false}
-        renderItem={({ item }) => (
-          <View style={styles.taskItem}>
-            <TouchableOpacity onPress={() => toggleCompletion(item.id, item.completed)}>
-              <Icon
-                name={item.completed ? 'checkbox-marked' : 'checkbox-blank-outline'}
-                size={24}
-                color={item.completed ? '#007AFF' : '#333'}
-              />
-            </TouchableOpacity>
-            <Text style={[styles.taskText, item.completed && styles.completedTaskText]}>
-              {item.text}
-            </Text>
-            <TouchableOpacity onPress={() => deleteTask(item.id)} style={styles.deleteButton}>
-              <Icon name="close" size={24} color="red" />
-            </TouchableOpacity>
-          </View>
-        )}
-        ListEmptyComponent={<Text style={styles.emptyText}>Henüz görev yok.</Text>}
-      />
+      {tasks.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <LottieView
+            source={require('../../assets/animations/todo.json')} 
+            autoPlay
+            loop
+            style={{ width: 200, height: 200 }}
+          />
+          <Text style={styles.emptyText}>Henüz görev yok</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={tasks}
+          keyExtractor={item => item.id}
+          scrollEnabled={false}
+          renderItem={({ item }) => (
+            <View style={styles.taskItem}>
+              <TouchableOpacity onPress={() => toggleCompletion(item.id, item.completed)}>
+                <Icon
+                  name={item.completed ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                  size={24}
+                  color={item.completed ? '#007AFF' : '#333'}
+                />
+              </TouchableOpacity>
+
+              <Text style={[styles.taskText, item.completed && styles.completedTaskText]}>
+                {item.text}
+              </Text>
+
+              <TouchableOpacity onPress={() => deleteTask(item.id)} style={styles.deleteButton}>
+                <Icon name="close" size={24} color="red" />
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -122,7 +133,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginTop: 30,
     paddingHorizontal: 20,
-    marginBottom:45
+    marginBottom: 45,
   },
   title: {
     fontSize: 22,
@@ -131,7 +142,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    marginBottom: 15,
     marginTop: 10,
   },
   input: {
@@ -170,9 +180,13 @@ const styles = StyleSheet.create({
   deleteButton: {
     padding: 8,
   },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   emptyText: {
     textAlign: 'center',
-    margin: 50,
     color: '#888',
+    fontSize: 16,
   },
 });

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Title from '../components/Title';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import RoomInfo from '../components/HomeScreenComponents/RoomInfo';
 import Tasks from '../components/HomeScreenComponents/Tasks';
 import CalendarComponent from '../components/HomeScreenComponents/Calender';
 
@@ -13,7 +12,6 @@ const HomeScreen = () => {
       <ScrollView >
         <View style={styles.downcontainer}> 
           <Title title="Görevler" />
-          <RoomInfo />
           <CalendarComponent selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
 
         </View>
@@ -38,8 +36,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#007AFF',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    height: 220,
-    zIndex:1
+    height: 180,
+    zIndex:1,
+    paddingTop:30
   },
 
 });

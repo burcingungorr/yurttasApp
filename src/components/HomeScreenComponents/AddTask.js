@@ -3,7 +3,6 @@ import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } fro
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Picker } from '@react-native-picker/picker';
 import firestore from '@react-native-firebase/firestore';
-import messaging from '@react-native-firebase/messaging';
 import { useSelector } from "react-redux";
 
 const AddTask = ({ selectedDate }) => {
@@ -112,11 +111,12 @@ export default AddTask;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    bottom: 25,
+    backgroundColor:'transparent'
+
   },
   plus: {
     position: 'absolute',
-    bottom: 20,
+    bottom: -40,
     right: 20,
     backgroundColor: '#007AFF',
     width: 60,

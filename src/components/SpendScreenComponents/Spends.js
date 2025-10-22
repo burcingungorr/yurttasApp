@@ -83,14 +83,14 @@ const handleDelete = (id) => {
     <View style={styles.container}>
       {spends.length === 0 ? (
         <View style={styles.lottieContainer}>
-         {/*
+      
 <LottieView
   source={require('../../assets/animations/spend.json')}
   autoPlay
   loop
   style={styles.lottie}
 />
-*/}
+
 
           <Text style={styles.noDataText}>Henüz hiç harcama eklenmedi.</Text>
         </View>
