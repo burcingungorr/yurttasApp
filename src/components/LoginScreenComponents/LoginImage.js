@@ -1,6 +1,9 @@
 import React from 'react'
-import { Image, View, StyleSheet } from 'react-native'
+import { Image, View, StyleSheet,Dimensions } from 'react-native'
 import loginImage from '../../assets/images/loginImage.png' 
+
+
+const { width, height } = Dimensions.get('window');
 
 const LoginImage = () => {
   return (
@@ -21,8 +24,8 @@ const styles = StyleSheet.create({
     marginVertical: 50,
   },
   image: {
-    width: 330,
-    height: 300,
+    width: width * 1.0,
+    height: height * 0.4,
   },
 });
 

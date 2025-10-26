@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet, Alert,Dimensions } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { createRoom, joinRoom } from '../../redux/roomSlice';
 import firestore from '@react-native-firebase/firestore';
 import messaging from '@react-native-firebase/messaging';
+import InputUsername from './InputUsername';
+import { saveUsername } from '../../redux/usernameSlice';
 
 const generateRoomCode = () => Math.floor(100000 + Math.random() * 900000).toString();
+const { height } = Dimensions.get('window');
 
 const RoomModals = ({ setIsLoggedIn }) => {
     const dispatch = useDispatch();
     const username = useSelector(state => state.username.savedUsername);
+    const [localUsername, setLocalUsername] = useState('');
 
     const [roomCode, setRoomCode] = useState('');
     const [newRoomName, setNewRoomName] = useState('');
@@ -66,38 +70,30 @@ const RoomModals = ({ setIsLoggedIn }) => {
     };
 
     const handleCreateRoom = () => {
-        if (!username) {
-            Alert.alert('Hata', 'Lütfen kullanıcı adınızı giriniz.');
-            return;
+        // Önce username'i kaydet
+        if (localUsername.trim()) {
+            dispatch(saveUsername(localUsername.trim()));
         }
 
-        firestore()
-            .collection('users')
-            .where('username', '==', username)
-            .get()
-            .then(querySnapshot => {
-                if (!querySnapshot.empty) {
+        // Username kaydedilmesini bekle
+        setTimeout(() => {
+            if (!username && !localUsername.trim()) {
+                Alert.alert('Hata', 'Lütfen kullanıcı adınızı giriniz.');
+                return;
+            }
+
+            const code = generateRoomCode();
+            dispatch(createRoom({ name: newRoomName, code }))
+                .unwrap()
+                .then(() => {
+                    setGeneratedCode(code);
+                    setCreateModalVisible(false);
+                    setCodeModalVisible(true);
+                    setNewRoomName('');
                     setIsLoggedIn(true);
-                    return;
-                }
-
-                
-
-                const code = generateRoomCode();
-                dispatch(createRoom({ name: newRoomName, code }))
-                    .unwrap()
-                    .then(() => {
-                        setGeneratedCode(code);
-                        setCreateModalVisible(false);
-                        setCodeModalVisible(true);
-                        setNewRoomName('');
-                    })
-                    .catch(err => Alert.alert('Hata', err.message));
-            })
-            .catch(err => {
-                console.error('Hesap kontrolü sırasında hata:', err);
-                Alert.alert('Hata', 'Hesap kontrolü sırasında bir hata oluştu.');
-            });
+                })
+                .catch(err => Alert.alert('Hata', err.message));
+        }, 300);
     };
 
     return (
@@ -106,7 +102,7 @@ const RoomModals = ({ setIsLoggedIn }) => {
                 <Text style={styles.buttonText}>Odaya Katıl</Text>
             </TouchableOpacity>
 
-            <Text style={{ marginVertical: 10 }}>VEYA</Text>
+            <Text style={{ marginVertical: 15 }}>VEYA</Text>
 
             <TouchableOpacity style={[styles.button, { backgroundColor: 'orange' }]} onPress={() => setCreateModalVisible(true)}>
                 <Text style={styles.buttonText}>Oda Kur</Text>
@@ -139,13 +135,16 @@ const RoomModals = ({ setIsLoggedIn }) => {
                         <TouchableOpacity style={styles.closeButton} onPress={() => setCreateModalVisible(false)}>
                             <Text style={styles.closeButtonText}>×</Text>
                         </TouchableOpacity>
-                        <Text style={styles.modalTitle}>Oda Adı</Text>
+                        <Text style={styles.modalTitle}>Yeni Oda Oluştur</Text>
+                        {/* <Text style={styles.label}>Oda Adı</Text> */}
                         <TextInput
-                            placeholder="Oda adını giriniz"
+                            placeholder="Oda adını belirleyin"
                             value={newRoomName}
                             onChangeText={setNewRoomName}
                             style={styles.input}
                         />
+                       <InputUsername username={localUsername} setUsername={setLocalUsername} />
+
                         <TouchableOpacity
                             style={[styles.modalButton, { opacity: newRoomName.trim() ? 1 : 0.5 }]}
                             disabled={!newRoomName.trim()}
@@ -179,14 +178,19 @@ const styles = StyleSheet.create({
     container: { 
         flex: 1, 
         justifyContent: 'center', 
-        alignItems: 'center' 
+        alignItems: 'center',
+        paddingBottom:height * 0.05,
     },
     button: { 
         backgroundColor: '#007AFF', 
         paddingVertical: 12, 
         paddingHorizontal: 30, 
         borderRadius: 8, 
-        marginBottom: 15 
+        // marginBottom: 15,
+        width: '45%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        
     },
     buttonText: { 
         color: 'white', 
@@ -218,15 +222,17 @@ const styles = StyleSheet.create({
     },
     modalTitle: { 
         fontSize: 18, 
-        marginBottom: 10, 
-        textAlign: 'center' 
+        fontWeight: 'bold',
+        marginBottom: 14, 
+        textAlign: 'center',
+        color: '#333'
     },
     input: { 
         borderWidth: 1, 
         borderColor: '#ccc', 
         borderRadius: 5, 
         padding: 10, 
-        marginBottom: 15 
+        marginBottom: 15 ,
     },
     modalButton: { 
         backgroundColor: '#007AFF', 
@@ -244,7 +250,13 @@ const styles = StyleSheet.create({
         textAlign: 'center', 
         marginVertical: 20, 
         color: '#333' 
-    }
+    },
+    label: {
+        fontSize: 18,
+        marginBottom: 10,
+        textAlign: 'start',
+        color: '#333',
+    },
 });
 
 export default RoomModals;

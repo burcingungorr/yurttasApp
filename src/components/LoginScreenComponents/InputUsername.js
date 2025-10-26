@@ -4,8 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import { saveUsername } from '../../redux/usernameSlice';
 
-const InputUsername = () => {
-    const [username, setUsername] = useState('');
+const InputUsername = ({ username, setUsername }) => {
     const dispatch = useDispatch();
     const savedUsername = useSelector(state => state.username.savedUsername);
     const message = useSelector(state => state.username.message);
@@ -20,7 +19,7 @@ const InputUsername = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.label}>Kullanıcı Adı</Text>
+            {/* <Text style={styles.label}>Kullanıcı Adı</Text> * */}
             <View style={styles.inputRow}>
                 <TextInput
                     style={styles.input}
@@ -28,9 +27,9 @@ const InputUsername = () => {
                     value={username}
                     onChangeText={setUsername}
                 />
-                <TouchableOpacity style={styles.iconButton} onPress={handleSave}>
+                {/* {<TouchableOpacity style={styles.iconButton} onPress={handleSave}>
                     <Icon name="check" size={24} color="#fff" />
-                </TouchableOpacity>
+                </TouchableOpacity> } */}
             </View>
 
             {savedUsername && (
@@ -50,25 +49,32 @@ export default InputUsername;
 
 const styles = StyleSheet.create({
     container: {
-        justifyContent: 'center',
-        padding: 8,
+        justifyContent: 'start',
+        alignItems: 'start',
+        width: '100%',
     },
     label: {
         fontSize: 18,
         marginBottom: 10,
+        textAlign: 'start',
+        color: '#333',
     },
     inputRow: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     input: {
-        flex: 1,
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 5,
         padding: 10,
-        marginRight: 10,
+        marginBottom: 15,
+        // fontSize: 16,
+        color: '#000',
+        width: '100%',   
+        alignSelf: 'center', 
     },
+
     iconButton: {
         backgroundColor: '#007AFF',
         padding: 8,

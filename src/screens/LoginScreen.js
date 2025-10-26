@@ -8,7 +8,7 @@ const LoginScreen = ({setIsLoggedIn}) => {
 return (
     <View style={{ flex: 1, justifyContent: 'center',padding:18,backgroundColor:'#FFFDF7'}}>
         <LoginImage/>
-        <InputUsername />
+        {/* <InputUsername /> */}
         <RoomModals  setIsLoggedIn={setIsLoggedIn}/>
     </View>
 )
