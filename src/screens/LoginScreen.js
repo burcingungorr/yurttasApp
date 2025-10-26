@@ -1,5 +1,3 @@
-import React from 'react'
-import InputUsername from '../components/LoginScreenComponents/InputUsername'
 import RoomModals from '../components/LoginScreenComponents/RoomModals'
 import { View } from 'react-native'
 import LoginImage from '../components/LoginScreenComponents/LoginImage'

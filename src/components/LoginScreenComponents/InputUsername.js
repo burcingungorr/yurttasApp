@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import { saveUsername } from '../../redux/usernameSlice';
 
@@ -10,16 +8,10 @@ const InputUsername = ({ username, setUsername }) => {
     const message = useSelector(state => state.username.message);
     const error = useSelector(state => state.username.error);
 
-    const handleSave = () => {
-        if (username.trim()) {
-            dispatch(saveUsername(username.trim()));
-        }
-        setUsername('')
-    };
+
 
     return (
         <View style={styles.container}>
-            {/* <Text style={styles.label}>Kullanıcı Adı</Text> * */}
             <View style={styles.inputRow}>
                 <TextInput
                     style={styles.input}
@@ -27,14 +19,8 @@ const InputUsername = ({ username, setUsername }) => {
                     value={username}
                     onChangeText={setUsername}
                 />
-                {/* {<TouchableOpacity style={styles.iconButton} onPress={handleSave}>
-                    <Icon name="check" size={24} color="#fff" />
-                </TouchableOpacity> } */}
             </View>
 
-            {savedUsername && (
-                <Text style={styles.savedText}>{savedUsername}</Text>
-            )}
             {message && (
                 <Text style={styles.infoText}>{message}</Text>
             )}
