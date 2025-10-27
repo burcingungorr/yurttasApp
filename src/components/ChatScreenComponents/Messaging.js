@@ -1,68 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
-import io from 'socket.io-client';
-import firestore from '@react-native-firebase/firestore'; 
+import firestore from '@react-native-firebase/firestore';
 import MessageInput from './MessageInput';
 import MessageItem from './MessageItem';
 
 const Messaging = () => {
   const currentUserId = useSelector(state => state.username.uid);
   const username = useSelector(state => state.username.savedUsername);
-  const roomCode = useSelector(state => state.room.currentRoom?.code); 
+  const roomCode = useSelector(state => state.room.currentRoom?.code);
 
-  const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false); 
+  const [isTyping, setIsTyping] = useState(false);
 
   const flatListRef = useRef();
 
+  // 🔹 Mesajlar değişince en alta kaydır
   useEffect(() => {
     if (messages.length > 0) {
       flatListRef.current?.scrollToEnd({ animated: true });
     }
   }, [messages]);
 
+  // 🔹 Firestore mesaj dinleyicisi
   useEffect(() => {
-    const socketConnection = io('http://10.0.2.2:3000', {
-      transports: ['websocket'],
-      query: { userId: currentUserId },
-    });
-
-    socketConnection.on('connect', () => {
-      console.log('Socket connected:', socketConnection.id);
-      setSocket(socketConnection);
-    });
-
-    socketConnection.on('connect_error', (err) => {
-      console.error('Connection error:', err);
-    });
-
-    socketConnection.on('typing', (username) => {
-      if (username) {
-        setIsTyping(`${username} yazıyor...`);
-      } else {
-        setIsTyping(false); 
-      }
-    });
-  
-    socketConnection.on('stopTyping', () => {
-      setIsTyping(false); 
-    });
-
-    socketConnection.on('message', (message) => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          text: message.text,
-          senderId: message.senderId,
-          username: message.username,
-          timestamp: message.timestamp,
-        },
-      ]);
-    });
+    if (!roomCode) return;
 
     const unsubscribe = firestore()
       .collection('rooms')
@@ -77,38 +40,20 @@ const Messaging = () => {
         setMessages(fetched);
       });
 
-    return () => {
-      socketConnection.disconnect();
-      unsubscribe();
-    };
-  }, [currentUserId, roomCode]);
+    return () => unsubscribe();
+  }, [roomCode]);
 
-  const handleTyping = () => {
-    if (socket) {
-      socket.emit('typing', username);  
-    }
-  };
-  
-  const stopTyping = () => {
-    if (socket) {
-      socket.emit('stopTyping');  
-      setIsTyping(false);
-    }
-  };
-
+  // 🔹 Mesaj gönderme
   const sendMessage = async () => {
-    if (newMessage.trim() === '' || !socket) return;
-
-    stopTyping(); 
+    if (newMessage.trim() === '' || !roomCode) return;
 
     const messageData = {
-      text: newMessage,
+      text: newMessage.trim(),
       senderId: currentUserId,
       username: username,
-      timestamp: new Date().getTime(),
+      timestamp: firestore.FieldValue.serverTimestamp(),
+      localTime: new Date().toISOString(), // ✅ eklendi
     };
-
-    socket.emit('chatMessage', messageData);
 
     await firestore()
       .collection('rooms')
@@ -117,7 +62,10 @@ const Messaging = () => {
       .add(messageData);
 
     setNewMessage('');
+    setIsTyping(false);
   };
+
+  const handleTyping = (typing) => setIsTyping(typing);
 
   const renderMessageItem = ({ item }) => (
     <MessageItem item={item} currentUserId={currentUserId} />
@@ -136,16 +84,15 @@ const Messaging = () => {
 
       {isTyping && (
         <View style={styles.typingContainer}>
-          <Text style={styles.typingText}>{isTyping}</Text>
+          <Text style={styles.typingText}>Yazıyor...</Text>
         </View>
       )}
 
-      <MessageInput 
+      <MessageInput
         newMessage={newMessage}
         setNewMessage={setNewMessage}
         sendMessage={sendMessage}
         handleTyping={handleTyping}
-        stopTyping={stopTyping} 
       />
     </View>
   );
@@ -155,7 +102,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    marginBottom: 5,
     paddingTop: 5,
   },
   messagesList: {

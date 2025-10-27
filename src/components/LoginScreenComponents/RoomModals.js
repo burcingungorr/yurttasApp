@@ -33,79 +33,108 @@ const RoomModals = ({ setIsLoggedIn }) => {
 
   // 🔹 Odaya Katıl
   const handleJoinRoom = async () => {
-    try {
-      const finalUsername = username || localUsername.trim();
-      if (!finalUsername) {
-        Alert.alert("Hata", "Lütfen kullanıcı adınızı giriniz.");
-        return;
-      }
-
-      // Kullanıcı adını benzersiz kontrol et ve kaydet
-      const userSnapshot = await firestore()
-        .collection("users")
-        .where("name", "==", finalUsername)
-        .get();
-
-      if (userSnapshot.empty) {
-        await dispatch(saveUsername(finalUsername)).unwrap();
-      }
-
-      await dispatch(joinRoom({ code: roomCode, username: finalUsername })).unwrap();
-
-      // Kullanıcıyı roommates altına ekle
-      const roomRef = firestore().collection("rooms").doc(roomCode);
-      const matesSnapshot = await roomRef
-        .collection("roommates")
-        .where("username", "==", finalUsername)
-        .get();
-
-      if (matesSnapshot.empty) {
-        await roomRef.collection("roommates").add({
-          username: finalUsername,
-          joinedAt: firestore.FieldValue.serverTimestamp(),
-        });
-      }
-
-      setIsLoggedIn(true);
-      setSelectModalVisible(false);
-    } catch (err) {
-      console.error("Odaya katılırken hata:", err);
-      Alert.alert("Hata", "Odaya katılamadın.");
+  try {
+    const finalUsername = username || localUsername.trim();
+    if (!finalUsername) {
+      Alert.alert("Hata", "Lütfen kullanıcı adınızı giriniz.");
+      return;
     }
-  };
+
+    // 🔹 Username Firestore'da var mı?
+    const userSnapshot = await firestore()
+      .collection("users")
+      .where("name", "==", finalUsername)
+      .get();
+
+    let savedUser;
+
+    if (userSnapshot.empty) {
+      // 🔹 Redux + Firestore'a kaydet
+      savedUser = await dispatch(saveUsername(finalUsername)).unwrap();
+    } else {
+      const existingUser = userSnapshot.docs[0].data();
+      savedUser = { uid: existingUser.uid, name: existingUser.name };
+      // 🔹 Redux’a manuel kaydet
+      dispatch({
+        type: "username/saveUsername/fulfilled",
+        payload: savedUser,
+      });
+    }
+
+    // 🔹 Redux’ta kullanıcı kaydedildiyse odaya katıl
+    if (!savedUser || !savedUser.uid) {
+      Alert.alert("Hata", "Kullanıcı bilgileri alınamadı.");
+      return;
+    }
+
+    await dispatch(joinRoom({ code: roomCode, username: savedUser.name })).unwrap();
+
+    const roomRef = firestore().collection("rooms").doc(roomCode);
+    const matesSnapshot = await roomRef
+      .collection("roommates")
+      .where("username", "==", savedUser.name)
+      .get();
+
+    if (matesSnapshot.empty) {
+      await roomRef.collection("roommates").add({
+        username: savedUser.name,
+        joinedAt: firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    setIsLoggedIn(true);
+    setSelectModalVisible(false);
+  } catch (err) {
+    console.error("Odaya katılırken hata:", err);
+    Alert.alert("Hata", "Odaya katılamadın.");
+  }
+};
+
 
   // 🔹 Oda Kur
-  const handleCreateRoom = async () => {
-    try {
-      const finalUsername = username || localUsername.trim();
-      if (!finalUsername) {
-        Alert.alert("Hata", "Lütfen kullanıcı adınızı giriniz.");
-        return;
-      }
-
-      // Username Firestore’da varsa yeniden kullan
-      const userSnapshot = await firestore()
-        .collection("users")
-        .where("name", "==", finalUsername)
-        .get();
-
-      if (userSnapshot.empty) {
-        await dispatch(saveUsername(finalUsername)).unwrap();
-      }
-
-      const code = generateRoomCode();
-      await dispatch(createRoom({ name: newRoomName, code })).unwrap();
-
-      setGeneratedCode(code);
-      setCreateModalVisible(false);
-      setCodeModalVisible(true);
-      setNewRoomName("");
-      setIsLoggedIn(true);
-    } catch (err) {
-      console.error("Oda oluşturulurken hata:", err);
-      Alert.alert("Hata",  "Oda oluşturulamadı.");
+ const handleCreateRoom = async () => {
+  try {
+    const finalUsername = username || localUsername.trim();
+    if (!finalUsername) {
+      Alert.alert("Hata", "Lütfen kullanıcı adınızı giriniz.");
+      return;
     }
-  };
+
+    let savedUser;
+    const userSnapshot = await firestore()
+      .collection("users")
+      .where("name", "==", finalUsername)
+      .get();
+
+    if (userSnapshot.empty) {
+      savedUser = await dispatch(saveUsername(finalUsername)).unwrap();
+    } else {
+      const existingUser = userSnapshot.docs[0].data();
+      savedUser = { uid: existingUser.uid, name: existingUser.name };
+      dispatch({
+        type: "username/saveUsername/fulfilled",
+        payload: savedUser,
+      });
+    }
+
+    if (!savedUser || !savedUser.uid) {
+      Alert.alert("Hata", "Kullanıcı bilgileri alınamadı.");
+      return;
+    }
+
+    const code = generateRoomCode();
+    await dispatch(createRoom({ name: newRoomName, code })).unwrap();
+
+    setGeneratedCode(code);
+    setCreateModalVisible(false);
+    setCodeModalVisible(true);
+    setNewRoomName("");
+    setIsLoggedIn(true);
+  } catch (err) {
+    console.error("Oda oluşturulurken hata:", err);
+    Alert.alert("Hata", "Oda oluşturulamadı.");
+  }
+};
 
   return (
     <View style={styles.container}>

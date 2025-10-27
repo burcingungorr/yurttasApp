@@ -90,7 +90,6 @@ const AvatarSelector = () => {
 const styles = StyleSheet.create({
   wrapper: {
     alignItems: 'center',
-    marginTop: 20,
   },
   mainAvatar: {
     width: 120,

@@ -1,12 +1,17 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const LogOut = ({setIsLoggedIn}) => {
+const LogOut = ({ setIsLoggedIn }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={() => setIsLoggedIn(false)}>
-        <Icon name="logout" size={21} color="#fff" />
+      <TouchableOpacity 
+        style={styles.button} 
+        onPress={() => setIsLoggedIn(false)}
+        activeOpacity={0.7}
+      >
+        <Icon name="logout" size={21} color="#000" />
+        <Text style={styles.text}>Çıkış Yap</Text>
       </TouchableOpacity>
     </View>
   );
@@ -14,20 +19,19 @@ const LogOut = ({setIsLoggedIn}) => {
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    marginRight:10,
-    marginTop:20,
-    paddingHorizontal:10
-
+    marginTop: 20,
   },
   button: {
-    backgroundColor: '#f48022',
-    padding: 10,
-    borderRadius: 50,
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+  },
+  text: {
+    color: '#000',
+    fontSize: 16,
+    marginLeft: 8,
   },
 });
 

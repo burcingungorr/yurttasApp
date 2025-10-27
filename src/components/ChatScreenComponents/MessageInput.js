@@ -28,7 +28,7 @@ const MessageInput = ({ newMessage, setNewMessage, sendMessage,handleTyping,stop
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    padding: 15,
+    padding: 20,
     borderColor: '#ccc',
     alignItems: 'center',
     backgroundColor: 'white',

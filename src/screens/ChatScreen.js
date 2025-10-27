@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, Text, View, ScrollView } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import Title from '../components/Title'
 import OtherUsers from '../components/ChatScreenComponents/OtherUsers'
 import Messaging from '../components/ChatScreenComponents/Messaging'
@@ -13,8 +13,7 @@ const ChatScreen = () => {
           <OtherUsers/>
         </View>
         <Messaging />
-      <View style={styles.messageInputContainer}>
-      </View>
+      <View style={styles.messageInputContainer} />
     </View>
   )
 }

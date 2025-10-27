@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, TouchableOpacity, View,StyleSheet,Text,FlatList,} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, FlatList, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
+import Modal from 'react-native-modal';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const Notification = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -19,7 +22,7 @@ const Notification = () => {
         .orderBy('createdAt', 'desc')
         .onSnapshot(snapshot => {
           const notifList = snapshot.docs
-            .filter(doc => !doc.data().userDeleted?.includes(userName)) 
+            .filter(doc => !doc.data().userDeleted?.includes(userName))
             .map(doc => ({
               id: doc.id,
               ...doc.data(),
@@ -27,12 +30,10 @@ const Notification = () => {
             }));
           setNotifications(notifList);
         });
-  
+
       return () => unsubscribe();
     }
   }, [roomCode, userName]);
-  
-
 
   const handleMarkAllAsRead = () => {
     notifications.forEach(notification => {
@@ -48,7 +49,6 @@ const Notification = () => {
       }
     });
   };
-  
 
   const handleDeleteNotification = id => {
     firestore()
@@ -60,12 +60,8 @@ const Notification = () => {
         userDeleted: firestore.FieldValue.arrayUnion(userName),
       });
   };
-  
 
-  const openModal = () => {
-    setModalVisible(true);
-  };
-
+  const openModal = () => setModalVisible(true);
   const closeModal = () => {
     handleMarkAllAsRead();
     setModalVisible(false);
@@ -90,7 +86,7 @@ const Notification = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={openModal} style={styles.iconWrapper}>
-        <Icon name="bell" color="white" size={25} />
+        <Icon name="bell" color="white" size={28} />
         {unreadNotifications.length > 0 && (
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{unreadNotifications.length}</Text>
@@ -98,24 +94,33 @@ const Notification = () => {
         )}
       </TouchableOpacity>
 
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Bildirimler</Text>
+      <Modal
+        isVisible={modalVisible}
+        animationIn="slideInRight"
+        animationOut="slideOutRight"
+        onBackdropPress={closeModal}
+        style={styles.modalWrapper}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Bildirimler</Text>
 
-            <FlatList
-              data={notifications}
-              renderItem={renderItem}
-              keyExtractor={item => item.id}
-              ListEmptyComponent={
-                <Text style={styles.emptyText}>Henüz bildirim yok.</Text>
-              }
-            />
+          <FlatList
+            data={notifications}
+            renderItem={renderItem}
+            keyExtractor={item => item.id}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>Henüz bildirim yok.</Text>
+            }
+          />
 
-            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>X</Text>
-            </TouchableOpacity>
-          </View>
+        <TouchableOpacity
+  onPress={closeModal}
+  style={styles.closeButton}
+  activeOpacity={0.7}
+>
+  <Text style={styles.closeButtonText}>X</Text>
+</TouchableOpacity>
+
         </View>
       </Modal>
     </View>
@@ -127,8 +132,8 @@ export default Notification;
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    top: 57,
-    right: 20,
+    top: 40,
+    right: 18,
   },
   iconWrapper: {
     position: 'relative',
@@ -149,25 +154,29 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  modalBackground: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  modalWrapper: {
+    margin: 0,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
   },
   modalContent: {
-    width: 300,
-    height: 450,
+    width: SCREEN_WIDTH * 0.75,
+    height: '100%',
     padding: 20,
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderTopLeftRadius: 24,
+    borderBottomLeftRadius: 24,
+
   },
-  modalTitle: {
-    fontSize: 18,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    marginBottom: 10,
+
+  modalTitle: { 
+    fontSize: 22, 
+    fontWeight: 'bold', 
+    color: '#1A1A1A' ,
+    textAlign:'center',
+    paddingVertical:15
   },
+
   notificationItem: {
     padding: 10,
     borderBottomWidth: 1,
@@ -190,12 +199,21 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 15,
-    right: 15,
-    zIndex: 1,
+    top: 16,
+    right: 16,
+    zIndex: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F8F9FA',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  closeButtonText: {
-    color: 'black',
-    fontSize: 20,
+
+  closeButtonText: { 
+    fontSize: 18, 
+    color: '#8E8E93', 
+    lineHeight: 28 
   },
+
 });
