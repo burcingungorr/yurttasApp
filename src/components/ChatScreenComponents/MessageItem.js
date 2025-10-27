@@ -10,8 +10,18 @@ const avatars = [
   { name: 'avatar4.png', source: require('../../assets/avatars/avatar4.png') },
   { name: 'avatar5.png', source: require('../../assets/avatars/avatar5.png') },
   { name: 'avatar6.png', source: require('../../assets/avatars/avatar6.png') },
+  { name: 'avatar7.png', source: require('../../assets/avatars/avatar7.png') },
+  { name: 'avatar8.png', source: require('../../assets/avatars/avatar8.png') },
+  { name: 'avatar9.png', source: require('../../assets/avatars/avatar9.png') },
+  { name: 'avatar10.png', source: require('../../assets/avatars/avatar10.png') },
+  { name: 'avatar11.png', source: require('../../assets/avatars/avatar11.png') },
+  { name: 'avatar12.png', source: require('../../assets/avatars/avatar12.png') },
+  { name: 'avatar13.png', source: require('../../assets/avatars/avatar13.png') },
+  { name: 'avatar14.png', source: require('../../assets/avatars/avatar14.png') },
+  { name: 'avatar15.png', source: require('../../assets/avatars/avatar15.png') },
   { name: 'default.png', source: require('../../assets/avatars/default.png') },
 ];
+
 
 const MessageItem = ({ item, currentUserId }) => {
   const [senderAvatar, setSenderAvatar] = useState(null);
