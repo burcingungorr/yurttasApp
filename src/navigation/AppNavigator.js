@@ -24,11 +24,11 @@ const AppNavigator = () => {
               let iconName = '';
 
               if (route.name === 'Home') {
-                iconName = 'home';
+                iconName = 'briefcase-clock';
               } else if (route.name === 'Spend') {
-                iconName = 'currency-usd';
+                iconName = 'tag';
               } else if (route.name === 'Survey') {
-                iconName = 'clipboard-text'; 
+                iconName = 'thought-bubble'; 
               } else if (route.name === 'Chat') {
                 iconName = 'chat';
               } else if (route.name === 'Profile') {

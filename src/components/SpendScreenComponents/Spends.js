@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useSelector } from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
 import LottieView from 'lottie-react-native';
@@ -31,7 +30,6 @@ const Spends = () => {
     return () => unsubscribe();
   }, [roomCode]);
 
-  
   useEffect(() => {
     if (!roomCode) return;
 
@@ -47,34 +45,31 @@ const Spends = () => {
     return () => unsubscribe();
   }, [roomCode]);
 
-
-
-const handleDelete = (id) => {
-  Alert.alert(
-    'Harcama Silinsin mi?',
-    'Bu harcamayı silmek istediğinizden emin misiniz?',
-    [
-      {
-        text: 'İptal',
-        style: 'cancel',
-      },
-      {
-        text: 'Sil',
-        style: 'destructive',
-        onPress: async () => {
-          await firestore()
-            .collection('rooms')
-            .doc(roomCode)
-            .collection('spends')
-            .doc(id)
-            .delete();
+  const handleDelete = (id) => {
+    Alert.alert(
+      'Harcama Silinsin mi?',
+      'Bu harcamayı silmek istediğinizden emin misiniz?',
+      [
+        {
+          text: 'İptal',
+          style: 'cancel',
         },
-      },
-    ],
-    { cancelable: true }
-  );
-};
-
+        {
+          text: 'Sil',
+          style: 'destructive',
+          onPress: async () => {
+            await firestore()
+              .collection('rooms')
+              .doc(roomCode)
+              .collection('spends')
+              .doc(id)
+              .delete();
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   const total = spends.reduce((sum, item) => sum + parseFloat(item.amount), 0);
   const perPerson = roommates.length > 0 ? (total / roommates.length).toFixed(2) : 0;
@@ -83,46 +78,52 @@ const handleDelete = (id) => {
     <View style={styles.container}>
       {spends.length === 0 ? (
         <View style={styles.lottieContainer}>
-      
-<LottieView
-  source={require('../../assets/animations/spend.json')}
-  autoPlay
-  loop
-  style={styles.lottie}
-/>
-
-
+          <LottieView
+            source={require('../../assets/animations/spend.json')}
+            autoPlay
+            loop
+            style={styles.lottie}
+          />
           <Text style={styles.noDataText}>Henüz hiç harcama eklenmedi.</Text>
         </View>
       ) : (
         <>
+          <View style={styles.summaryHeader}>
+            <View style={styles.summaryBadge}>
+              <Text style={styles.badgeLabel}>Toplam</Text>
+              <Text style={styles.badgeValue}>{total.toFixed(2)}₺</Text>
+            </View>
+            <View style={styles.summaryBadge}>
+              <Text style={styles.badgeLabel}>Kişi Başı</Text>
+              <Text style={styles.badgeValue}>{perPerson}₺</Text>
+            </View>
+          </View>
+
           <FlatList
             data={spends}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <View style={styles.item}>
-                <View style={styles.item_row}>
-                  <Text style={styles.item_text}>{item.title}</Text>
-                  <Text style={styles.amount_text}>{item.amount}₺</Text>
+              <View style={styles.spendCard}>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.titleText}>{item.title}</Text>
+                  <Text style={styles.amountText}>{item.amount}₺</Text>
                 </View>
 
-                <Text style={styles.container_text}>
-                  ({item.user} tarafından alındı.)
+                <Text style={styles.userText}>
+                  {item.user} tarafından alındı
                 </Text>
 
                 {item.user === userName && (
                   <TouchableOpacity
-                    style={styles.delete_button}
+                    style={styles.deleteButton}
                     onPress={() => handleDelete(item.id)}
                   >
-                    <Icon name="delete" size={22} color="grey" />
+                    <Text style={styles.deleteText}>×</Text>
                   </TouchableOpacity>
                 )}
               </View>
             )}
           />
-          <Text style={styles.total_pay}>Toplam : {total}₺</Text>
-          <Text style={styles.user_pay}>(Kişi Başı : {perPerson}₺)</Text>
         </>
       )}
     </View>
@@ -131,57 +132,98 @@ const handleDelete = (id) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    paddingTop: 40,
-    height: '87%',
-  },
-  item: {
+    flex: 1,
     padding: 10,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    marginBottom: 20,
-    position: 'relative',
-    borderWidth: 2,
-    borderColor: '#f48022',
-    elevation: 3,
+    paddingTop: 20,
   },
-  item_row: {
+  spendCard: {
+    padding: 14,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    marginTop: 16,
+    marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
-  item_text: {
-    fontSize: 18,
-    margin: 5,
+  titleText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    flex: 1,
+    color: '#333',
   },
-  amount_text: {
-    fontSize: 18,
-    margin: 5,
+  amountText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginLeft: 10,
+    paddingRight: 14,
+    paddingTop: 10,
   },
-  container_text: {
-    fontStyle: 'italic',
+  userText: {
     fontSize: 12,
+    color: 'gray',
+    fontStyle: 'italic',
   },
-  delete_button: {
+  deleteButton: {
     position: 'absolute',
-    bottom: 7,
-    right: 20,
-    zIndex: 1,
+    right: -1,
+    top: -2,
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  total_pay: {
-    margin: 6,
-    fontSize: 15,
+  deleteText: {
+    color: '#f48022',
+    fontSize: 22,
+    fontWeight: 'bold',
   },
-  user_pay: {
-    margin: 6,
-    fontSize: 15,
+  summaryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  summaryBadge: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    flex: 1,
+    marginHorizontal: 4,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+  },
+  badgeLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  badgeValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#007AFF',
   },
   lottieContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
-    marginBottom:100
-
+    marginBottom: 100,
   },
   lottie: {
     width: 250,
@@ -192,7 +234,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 10,
     color: '#666',
-  }
+  },
 });
 
 export default Spends;
