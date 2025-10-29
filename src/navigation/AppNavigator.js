@@ -24,7 +24,7 @@ const AppNavigator = () => {
               let iconName = '';
 
               if (route.name === 'Home') {
-                iconName = 'briefcase-clock';
+                iconName = 'order-bool-ascending-variant';
               } else if (route.name === 'Spend') {
                 iconName = 'tag';
               } else if (route.name === 'Survey') {

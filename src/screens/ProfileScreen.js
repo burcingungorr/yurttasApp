@@ -15,7 +15,7 @@ const ProfileScreen = ({ setIsLoggedIn }) => {
         <View style={styles.downcontainer}>  
         <Title title="Profil" />
         <Notification/>
-        <Settings/>
+<Settings setIsLoggedIn={setIsLoggedIn} />
         <AvatarSelector />
         <Username />
         </View>

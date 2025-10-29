@@ -1,34 +1,39 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Alert, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
 import Modal from 'react-native-modal';
 import LogOut from './LogOut'; 
 import Users from './Users';
+import { clearUser } from '../../redux/usernameSlice';
+import { clearRoom } from '../../redux/roomSlice';
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const Settings = ({ setIsLoggedIn }) => {
+  const dispatch = useDispatch();
   const [modalVisible, setModalVisible] = useState(false);
   const username = useSelector(state => state.username.savedUsername);
   const roomCode = useSelector(state => state.room.currentRoom?.code);
   const roomName = useSelector(state => state.room.currentRoom?.name);
 
-  const confirmLogout = () => {
+  const confirmDeleteFromRoom = () => {
     Alert.alert(
-      'Odadan Çıkılsın mı?',
-      'Gerçekten odadan çıkmak istiyor musunuz?',
+      'Odadan Kayıt Sil',
+      'Gerçekten bu odadan kaydınızı silmek istiyor musunuz? Bu işlem geri alınamaz.',
       [
         { text: 'İptal', style: 'cancel' },
-        { text: 'Çık', style: 'destructive', onPress: handleLogOut },
+        { text: 'Sil', style: 'destructive', onPress: handleDeleteFromRoom },
       ],
       { cancelable: true }
     );
   };
 
-  const handleLogOut = async () => {
+  const handleDeleteFromRoom = async () => {
     try {
+      // Kullanıcının roommates koleksiyonundan kaydını sil
       const snapshot = await firestore()
         .collection('rooms')
         .doc(roomCode)
@@ -40,11 +45,25 @@ const Settings = ({ setIsLoggedIn }) => {
       snapshot.forEach(doc => batch.delete(doc.ref));
       await batch.commit();
 
+      // Redux state'i temizle
+      dispatch(clearUser());
+      dispatch(clearRoom());
+
       setModalVisible(false);
       setIsLoggedIn(false);
+
+      Alert.alert(
+        'Başarılı',
+        'Odadan kaydınız başarıyla silindi.',
+        [{ text: 'Tamam' }]
+      );
     } catch (error) {
-      console.error('Odadan çıkış sırasında hata:', error);
-      Alert.alert('Hata', 'Odadan çıkış sırasında bir hata oluştu. Lütfen tekrar deneyin.', [{ text: 'Tamam' }]);
+      console.error('Odadan kayıt silme sırasında hata:', error);
+      Alert.alert(
+        'Hata', 
+        'Odadan kayıt silinirken bir hata oluştu. Lütfen tekrar deneyin.', 
+        [{ text: 'Tamam' }]
+      );
     }
   };
 
@@ -128,12 +147,12 @@ const Settings = ({ setIsLoggedIn }) => {
             <LogOut setIsLoggedIn={setIsLoggedIn} />
 
             <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={confirmLogout}
+              style={styles.deleteButton}
+              onPress={confirmDeleteFromRoom}
               activeOpacity={0.8}
             >
-              <Icon name="exit-to-app" size={22} color="white" />
-              <Text style={styles.logoutButtonText}>Odadan Kayıt Sil</Text>
+              <Icon name="delete-forever" size={22} color="white" />
+              <Text style={styles.deleteButtonText}>Odadan Kayıt Sil</Text>
             </TouchableOpacity>
 
           </View>
@@ -245,7 +264,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff', 
   },
 
-  logoutButton: {
+  deleteButton: {
     flexDirection: 'row',
     backgroundColor: '#f48022',
     paddingVertical: 16,
@@ -256,7 +275,7 @@ const styles = StyleSheet.create({
     marginTop: 15
   },
 
-  logoutButtonText: { 
+  deleteButtonText: { 
     color: 'white', 
     fontSize: 17, 
     fontWeight: 'bold', 
