@@ -6,20 +6,31 @@ export const saveUsername = createAsyncThunk(
   'username/saveUsername',
   async (username, { rejectWithValue }) => {
     try {
-      const userRef = firestore().collection('users');
-      const snapshot = await userRef.where('name', '==', username).get();
+      const normalizeName = (name) =>
+        name
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
 
-      // Kullanıcı zaten varsa mevcut bilgileri döndür
-      if (!snapshot.empty) {
-        const existingUser = snapshot.docs[0].data();
-        return { uid: existingUser.uid, name: existingUser.name };
+      const userRef = firestore().collection('users');
+      const snapshot = await userRef.get();
+
+      const normalizedNew = normalizeName(username);
+
+      const nameExists = snapshot.docs.some((doc) => {
+        const savedName = doc.data().name;
+        return normalizeName(savedName) === normalizedNew;
+      });
+
+      if (nameExists) {
+        return rejectWithValue('Bu kullanıcı adı alınmış. Başka bir isim girin.');
       }
 
-      // Yeni kullanıcı oluştur
       const uid = uuid.v4();
       await userRef.doc(uid).set({
-        uid: uid,
+        uid,
         name: username,
+        normalizedName: normalizedNew,
         createdAt: firestore.FieldValue.serverTimestamp(),
       });
 
@@ -52,7 +63,7 @@ const usernameSlice = createSlice({
         state.error = null;
       })
       .addCase(saveUsername.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload || action.error.message;
       });
   },
 });

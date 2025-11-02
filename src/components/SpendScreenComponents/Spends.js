@@ -145,10 +145,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+
   },
   cardHeader: {
     flexDirection: 'row',
@@ -203,11 +200,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     flex: 1,
     marginHorizontal: 4,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 1,
+    elevation:4
   },
   badgeLabel: {
     fontSize: 12,

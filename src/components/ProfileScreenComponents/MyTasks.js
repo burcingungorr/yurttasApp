@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, SafeAreaView, Animated } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
 import LottieView from 'lottie-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MyTasks = () => {
   const [task, setTask] = useState('');
@@ -25,7 +26,6 @@ const MyTasks = () => {
           completed: doc.data().completed,
         }));
         
-        // Tamamlanmayanları başa, tamamlananları sona sırala
         const sortedTasks = fetchedTasks.sort((a, b) => {
           if (a.completed === b.completed) return 0;
           return a.completed ? 1 : -1;
@@ -81,7 +81,6 @@ const MyTasks = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header Section */}
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Kişisel Görevlerim</Text>
@@ -94,7 +93,6 @@ const MyTasks = () => {
     
       </View>
 
-      {/* Input Section */}
       <View style={styles.inputCard}>
         <View style={styles.inputContainer}>
           <View style={styles.inputWrapper}>
@@ -114,7 +112,6 @@ const MyTasks = () => {
         </View>
       </View>
 
-      {/* Tasks List */}
       {tasks.length === 0 ? (
         <View style={styles.emptyContainer}>
           <LottieView

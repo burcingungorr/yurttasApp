@@ -1,5 +1,4 @@
-import React from 'react';
-import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import Username from '../components/ProfileScreenComponents/Username';
 import MyTasks from '../components/ProfileScreenComponents/MyTasks';
 import AvatarSelector from '../components/ProfileScreenComponents/Avatars';
@@ -7,6 +6,7 @@ import Title from '../components/Title';
 
 import Notification from '../components/ProfileScreenComponents/Notification';
 import Settings from '../components/ProfileScreenComponents/Settings';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ProfileScreen = ({ setIsLoggedIn }) => {
   return (

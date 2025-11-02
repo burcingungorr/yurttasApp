@@ -21,11 +21,9 @@ const LogOut = ({ setIsLoggedIn }) => {
           text: 'Çıkış Yap',
           style: 'destructive',
           onPress: () => {
-            // Redux state'i temizle
             dispatch(clearUser());
             dispatch(clearRoom());
             
-            // Login ekranına yönlendir
             setIsLoggedIn(false);
           }
         }

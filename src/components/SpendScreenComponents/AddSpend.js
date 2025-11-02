@@ -110,7 +110,6 @@ const AddSpend = ({ setSpends, spends }) => {
 export default AddSpend;
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   plus: { position: 'absolute', bottom: 40, right: 20, backgroundColor: '#007AFF', width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', elevation: 5 },
   modalBackground: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.3)', padding: 20 },
   modalBox: { backgroundColor: 'white', borderRadius: 10, padding: 20 },

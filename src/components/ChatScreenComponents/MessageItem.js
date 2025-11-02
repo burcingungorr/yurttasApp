@@ -27,7 +27,6 @@ const MessageItem = ({ item, currentUserId }) => {
   const [senderAvatar, setSenderAvatar] = useState(null);
   const isMe = item.senderId === currentUserId;
 
-  // 🔹 Güvenli tarih formatlama (Invalid Date hatasını önler)
   let timeString = '';
   if (item.timestamp) {
     const ts = item.timestamp.toDate ? item.timestamp.toDate() : item.timestamp;
@@ -56,7 +55,6 @@ const MessageItem = ({ item, currentUserId }) => {
 
   return (
     <View style={[styles.messageContainer, isMe ? styles.myMessageContainer : styles.otherMessageContainer]}>
-      {/* 🔹 Sol taraftaki avatar (diğer kullanıcı) */}
       {!isMe && senderAvatar ? (
         <View style={styles.avatar}>
           <Image source={senderAvatar} style={styles.avatarImage} />
@@ -67,7 +65,6 @@ const MessageItem = ({ item, currentUserId }) => {
         </View>
       )}
 
-      {/* 🔹 Mesaj balonu */}
       <View style={[styles.messageBubble, isMe ? styles.myMessageBubble : styles.otherMessageBubble]}>
         <Text style={styles.senderName}>
           {isMe ? 'Ben' : item.username || 'Diğer Kullanıcı'}
@@ -80,7 +77,6 @@ const MessageItem = ({ item, currentUserId }) => {
         </Text>
       </View>
 
-      {/* 🔹 Sağ taraftaki avatar (benim mesajım) */}
       {isMe && senderAvatar ? (
         <View style={styles.avatar}>
           <Image source={senderAvatar} style={styles.avatarImage} />
@@ -97,7 +93,7 @@ const MessageItem = ({ item, currentUserId }) => {
 const styles = StyleSheet.create({
   messageContainer: {
     flexDirection: 'row',
-    marginVertical: 4,
+    marginVertical: 5,
     alignItems: 'flex-end',
   },
   myMessageContainer: {

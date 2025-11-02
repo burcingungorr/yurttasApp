@@ -17,6 +17,7 @@ import { saveUsername } from "../../redux/usernameSlice";
 
 const generateRoomCode = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
+
 const { height } = Dimensions.get("window");
 
 const RoomModals = ({ setIsLoggedIn }) => {
@@ -27,114 +28,89 @@ const RoomModals = ({ setIsLoggedIn }) => {
   const [roomCode, setRoomCode] = useState("");
   const [newRoomName, setNewRoomName] = useState("");
   const [generatedCode, setGeneratedCode] = useState("");
+
   const [selectModalVisible, setSelectModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [codeModalVisible, setCodeModalVisible] = useState(false);
 
-  // 🔹 Odaya Katıl
+  const getOrCreateUser = async (finalUsername) => {
+    const userSnapshot = await firestore()
+      .collection("users")
+      .where("name", "==", finalUsername)
+      .get();
+
+    if (userSnapshot.empty) {
+      return await dispatch(saveUsername(finalUsername)).unwrap();
+    } else {
+      const existingUser = userSnapshot.docs[0].data();
+      dispatch({
+        type: saveUsername.fulfilled.type,
+        payload: { uid: existingUser.uid, name: existingUser.name },
+      });
+      return { uid: existingUser.uid, name: existingUser.name };
+    }
+  };
+
   const handleJoinRoom = async () => {
-  try {
-    const finalUsername = username || localUsername.trim();
-    if (!finalUsername) {
-      Alert.alert("Hata", "Lütfen kullanıcı adınızı giriniz.");
-      return;
+    try {
+      const finalUsername = username || localUsername.trim();
+      if (!finalUsername) {
+        Alert.alert("Hata", "Lütfen kullanıcı adınızı giriniz.");
+        return;
+      }
+
+      const savedUser = await getOrCreateUser(finalUsername);
+
+      await dispatch(
+        joinRoom({ code: roomCode, username: savedUser.name })
+      ).unwrap();
+
+      const roomRef = firestore().collection("rooms").doc(roomCode);
+
+      const matesSnapshot = await roomRef
+        .collection("roommates")
+        .where("username", "==", savedUser.name)
+        .get();
+
+      if (matesSnapshot.empty) {
+        await roomRef.collection("roommates").add({
+          username: savedUser.name,
+          joinedAt: firestore.FieldValue.serverTimestamp(),
+        });
+      }
+
+      setIsLoggedIn(true);
+      setSelectModalVisible(false);
+    } catch (err) {
+      console.error("Odaya katılırken hata:", err);
+      Alert.alert("Hata", "Odaya katılamadın.");
     }
+  };
 
-    // 🔹 Username Firestore'da var mı?
-    const userSnapshot = await firestore()
-      .collection("users")
-      .where("name", "==", finalUsername)
-      .get();
+  const handleCreateRoom = async () => {
+    try {
+      const finalUsername = username || localUsername.trim();
+      if (!finalUsername) {
+        Alert.alert("Hata", "Lütfen kullanıcı adınızı giriniz.");
+        return;
+      }
 
-    let savedUser;
+      const savedUser = await getOrCreateUser(finalUsername);
 
-    if (userSnapshot.empty) {
-      // 🔹 Redux + Firestore'a kaydet
-      savedUser = await dispatch(saveUsername(finalUsername)).unwrap();
-    } else {
-      const existingUser = userSnapshot.docs[0].data();
-      savedUser = { uid: existingUser.uid, name: existingUser.name };
-      // 🔹 Redux’a manuel kaydet
-      dispatch({
-        type: "username/saveUsername/fulfilled",
-        payload: savedUser,
-      });
+      const code = generateRoomCode();
+
+      await dispatch(createRoom({ name: newRoomName, code })).unwrap();
+
+      setGeneratedCode(code);
+      setCreateModalVisible(false);
+      setCodeModalVisible(true);
+      setNewRoomName("");
+      setIsLoggedIn(true);
+    } catch (err) {
+      console.error("Oda oluşturulurken hata:", err);
+      Alert.alert("Hata", err?.message || "Oda oluşturulamadı.");
     }
-
-    // 🔹 Redux’ta kullanıcı kaydedildiyse odaya katıl
-    if (!savedUser || !savedUser.uid) {
-      Alert.alert("Hata", "Kullanıcı bilgileri alınamadı.");
-      return;
-    }
-
-    await dispatch(joinRoom({ code: roomCode, username: savedUser.name })).unwrap();
-
-    const roomRef = firestore().collection("rooms").doc(roomCode);
-    const matesSnapshot = await roomRef
-      .collection("roommates")
-      .where("username", "==", savedUser.name)
-      .get();
-
-    if (matesSnapshot.empty) {
-      await roomRef.collection("roommates").add({
-        username: savedUser.name,
-        joinedAt: firestore.FieldValue.serverTimestamp(),
-      });
-    }
-
-    setIsLoggedIn(true);
-    setSelectModalVisible(false);
-  } catch (err) {
-    console.error("Odaya katılırken hata:", err);
-    Alert.alert("Hata", "Odaya katılamadın.");
-  }
-};
-
-
-  // 🔹 Oda Kur
- const handleCreateRoom = async () => {
-  try {
-    const finalUsername = username || localUsername.trim();
-    if (!finalUsername) {
-      Alert.alert("Hata", "Lütfen kullanıcı adınızı giriniz.");
-      return;
-    }
-
-    let savedUser;
-    const userSnapshot = await firestore()
-      .collection("users")
-      .where("name", "==", finalUsername)
-      .get();
-
-    if (userSnapshot.empty) {
-      savedUser = await dispatch(saveUsername(finalUsername)).unwrap();
-    } else {
-      const existingUser = userSnapshot.docs[0].data();
-      savedUser = { uid: existingUser.uid, name: existingUser.name };
-      dispatch({
-        type: "username/saveUsername/fulfilled",
-        payload: savedUser,
-      });
-    }
-
-    if (!savedUser || !savedUser.uid) {
-      Alert.alert("Hata", "Kullanıcı bilgileri alınamadı.");
-      return;
-    }
-
-    const code = generateRoomCode();
-    await dispatch(createRoom({ name: newRoomName, code })).unwrap();
-
-    setGeneratedCode(code);
-    setCreateModalVisible(false);
-    setCodeModalVisible(true);
-    setNewRoomName("");
-    setIsLoggedIn(true);
-  } catch (err) {
-    console.error("Oda oluşturulurken hata:", err);
-    Alert.alert("Hata", "Oda oluşturulamadı.");
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -142,19 +118,19 @@ const RoomModals = ({ setIsLoggedIn }) => {
         style={styles.button}
         onPress={() => setSelectModalVisible(true)}
       >
-        <Text style={styles.buttonText}>Odaya Katıl</Text>
+        <Text style={styles.buttonText}>Odaya Gir</Text>
       </TouchableOpacity>
 
       <Text style={{ marginVertical: 15 }}>VEYA</Text>
 
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: "orange" }]}
+        style={[styles.button, { backgroundColor: "#fa8d34ff" }]}
         onPress={() => setCreateModalVisible(true)}
       >
         <Text style={styles.buttonText}>Oda Kur</Text>
       </TouchableOpacity>
 
-      {/* 🔹 Odaya Katıl Modal */}
+      {/* Join Room Modal */}
       <Modal visible={selectModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -167,7 +143,6 @@ const RoomModals = ({ setIsLoggedIn }) => {
 
             <Text style={styles.modalTitle}>Odaya Katıl</Text>
 
-            {/* Kullanıcı adı input */}
             <InputUsername username={localUsername} setUsername={setLocalUsername} />
 
             <TextInput
@@ -178,17 +153,14 @@ const RoomModals = ({ setIsLoggedIn }) => {
               style={styles.input}
             />
 
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={handleJoinRoom}
-            >
+            <TouchableOpacity style={styles.modalButton} onPress={handleJoinRoom}>
               <Text style={styles.modalButtonText}>Katıl</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* 🔹 Oda Kur Modal */}
+      {/* Create Room Modal */}
       <Modal visible={createModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -224,7 +196,7 @@ const RoomModals = ({ setIsLoggedIn }) => {
         </View>
       </Modal>
 
-      {/* 🔹 Kod Göster Modal */}
+      {/* Room Code Modal */}
       <Modal visible={codeModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -236,6 +208,7 @@ const RoomModals = ({ setIsLoggedIn }) => {
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Odanız Kuruldu!</Text>
             <Text style={styles.roomCode}>{generatedCode}</Text>
+
             <TouchableOpacity
               style={styles.modalButton}
               onPress={() => setCodeModalVisible(false)}
@@ -250,7 +223,6 @@ const RoomModals = ({ setIsLoggedIn }) => {
 };
 
 export default RoomModals;
-
 
 const styles = StyleSheet.create({
   container: {
@@ -285,7 +257,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     position: "relative",
-    marginTop:150
+    marginTop: 150,
   },
   closeButton: { position: "absolute", top: 10, right: 10, zIndex: 1 },
   closeButtonText: { fontSize: 26, color: "#333" },

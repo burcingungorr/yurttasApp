@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import RoomModals from '../components/LoginScreenComponents/RoomModals';
 import LoginImage from '../components/LoginScreenComponents/LoginImage';
@@ -11,12 +11,12 @@ const LoginScreen = ({ setIsLoggedIn }) => {
     if (!username) {
       setIsLoggedIn(false);
     } else {
-      setIsLoggedIn(true); // kullanıcı adı varsa girişte kalsın
+      setIsLoggedIn(true); 
     }
   }, [username, setIsLoggedIn]);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 18, backgroundColor: '#FFFDF7' }}>
+    <View style={styles.container}>
       <LoginImage />
       <RoomModals setIsLoggedIn={setIsLoggedIn} />
     </View>
@@ -24,3 +24,10 @@ const LoginScreen = ({ setIsLoggedIn }) => {
 };
 
 export default LoginScreen;
+
+
+const styles = StyleSheet.create({
+  container:{ flex: 1, justifyContent: 'center', padding: 18, backgroundColor: '#FFFDF7' }
+
+
+});

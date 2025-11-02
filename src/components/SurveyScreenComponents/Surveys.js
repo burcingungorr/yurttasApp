@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
-import LottieView from 'lottie-react-native'; 
+import LottieView from 'lottie-react-native';
+import uuid from 'react-native-uuid'; 
 
 const Surveys = ({ surveys, setSurveys }) => {
   const uid = useSelector(state => state.username.uid);
@@ -40,7 +41,7 @@ const Surveys = ({ surveys, setSurveys }) => {
 
       const updateObj = {
         votes: newVotes,
-        [`votedUsers.${uid}`]: optionIndex, 
+        [`votedUsers.${uid}`]: optionIndex,
       };
 
       await surveyRef.update(updateObj);
@@ -113,10 +114,11 @@ const Surveys = ({ surveys, setSurveys }) => {
   }
 
   return (
-    <View style={{ padding: 10 }}>
+    <View style={{ padding: 10, flex: 1 }}>
       {surveys.map(survey => {
         const optionsArray = Array.isArray(survey.options)
           ? survey.options.map((text, index) => ({
+              id: uuid.v4(),
               index,
               text,
               votedUsers: survey.votedUsers
@@ -132,8 +134,10 @@ const Surveys = ({ surveys, setSurveys }) => {
         const isExpired = expiryDate < now;
         const totalVotes = survey.votes?.reduce((a, b) => a + b, 0) || 0;
 
+        const surveyKey = survey.id + '-' + uuid.v4();
+
         return (
-          <View key={survey.id} style={styles.surveyCard}>
+          <View key={surveyKey} style={styles.surveyCard}>
             <View style={styles.cardHeader}>
               <Text style={styles.question}>{survey.question}</Text>
               <Text style={styles.expiryText}>{formatExpiry(survey.expiry)}</Text>
@@ -152,7 +156,7 @@ const Surveys = ({ surveys, setSurveys }) => {
 
               return (
                 <TouchableOpacity
-                  key={`${survey.id}-${option.index}`}
+                  key={option.id} 
                   disabled={isExpired}
                   style={[styles.optionButton, buttonStyle]}
                   onPress={() => handleVote(survey.id, option.index)}

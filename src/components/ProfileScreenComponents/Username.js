@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux';
 const Username = () => {
   const userName = useSelector(state => state.username.savedUsername);
 
-  // Eğer kullanıcı adı boş veya tanımsızsa "Anonim" yaz
   const displayName = userName && userName.trim() !== '' ? userName : 'Anonim';
 
   return (

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
+import LottieView from 'lottie-react-native';
 import MessageInput from './MessageInput';
 import MessageItem from './MessageItem';
 
@@ -16,14 +17,12 @@ const Messaging = () => {
 
   const flatListRef = useRef();
 
-  // 🔹 Mesajlar değişince en alta kaydır
   useEffect(() => {
     if (messages.length > 0) {
       flatListRef.current?.scrollToEnd({ animated: true });
     }
   }, [messages]);
 
-  // 🔹 Firestore mesaj dinleyicisi
   useEffect(() => {
     if (!roomCode) return;
 
@@ -43,7 +42,6 @@ const Messaging = () => {
     return () => unsubscribe();
   }, [roomCode]);
 
-  // 🔹 Mesaj gönderme
   const sendMessage = async () => {
     if (newMessage.trim() === '' || !roomCode) return;
 
@@ -52,7 +50,7 @@ const Messaging = () => {
       senderId: currentUserId,
       username: username,
       timestamp: firestore.FieldValue.serverTimestamp(),
-      localTime: new Date().toISOString(), // ✅ eklendi
+      localTime: new Date().toISOString(), 
     };
 
     await firestore()
@@ -73,14 +71,26 @@ const Messaging = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMessageItem}
-        contentContainerStyle={styles.messagesList}
-        keyboardShouldPersistTaps="handled"
-      />
+      {messages.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <LottieView
+            source={require('../../assets/animations/messaging.json')} 
+            autoPlay
+            loop
+            style={styles.lottie}
+          />
+          <Text style={styles.emptyText}>Henüz mesaj yok</Text>
+        </View>
+      ) : (
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={renderMessageItem}
+          contentContainerStyle={styles.messagesList}
+          keyboardShouldPersistTaps="handled"
+        />
+      )}
 
       {isTyping && (
         <View style={styles.typingContainer}>
@@ -116,6 +126,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontStyle: 'italic',
     color: 'black',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  lottie: {
+    width: 250,
+    height: 250,
+  },
+  emptyText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#555',
   },
 });
 

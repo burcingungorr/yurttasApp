@@ -1,10 +1,8 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { saveUsername } from '../../redux/usernameSlice';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
 
 const InputUsername = ({ username, setUsername }) => {
-    const dispatch = useDispatch();
-    const savedUsername = useSelector(state => state.username.savedUsername);
+  
     const message = useSelector(state => state.username.message);
     const error = useSelector(state => state.username.error);
 
@@ -55,7 +53,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginBottom: 15,
-        // fontSize: 16,
         color: '#000',
         width: '100%',   
         alignSelf: 'center', 

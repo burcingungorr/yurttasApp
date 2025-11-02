@@ -7,6 +7,7 @@ import {
   TextInput,
   Text,
   ScrollView,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import firestore from '@react-native-firebase/firestore';
@@ -31,59 +32,80 @@ const AddSurvey = ({ setSurveys, surveys }) => {
 
   const handleAddOption = () => setOptions([...options, '']);
 
-  const handleAddSurvey = async () => {
-      setModalVisible(false);
-    if (!question.trim() || options.some(opt => !opt.trim())) {
-      alert('Lütfen soru ve tüm seçenekleri doldurun.');
-      return;
-    }
+ const handleAddSurvey = async () => {
+  setModalVisible(false);
 
-    if (!expiry) {
-      alert('Lütfen anketin bitiş tarihini girin.');
-      return;
-    }
+  if (!question.trim() || options.some(opt => !opt.trim())) {
+    Alert.alert('Hata', 'Lütfen soru ve tüm seçenekleri doldurun.');
+    return;
+  }
 
-    const newSurvey = {
-      question,
-      options,
-      votes: options.map(() => 0),
-      expiry,
-      createdBy: userName,
-      createdAt: firestore.FieldValue.serverTimestamp(),
-    };
+  if (options.length < 2) {
+    Alert.alert('Hata', 'En az 2 seçenek eklemelisiniz.');
+    return;
+  }
 
-    try {
-      const docRef = await firestore()
-        .collection('rooms')
-        .doc(roomCode)
-        .collection('surveys')
-        .add(newSurvey);
+  if (!expiry) {
+    Alert.alert('Hata', 'Lütfen anketin bitiş tarihini girin.');
+    return;
+  }
 
-      const addedSurvey = await docRef.get();
-      setSurveys(prev => [...prev, { id: docRef.id, ...addedSurvey.data() }]);
-      
-      setQuestion('');
-      setOptions(['']);
-      setExpiry('');
-      
-    } catch (error) {
-      console.error('Anket eklenirken hata:', error);
-      alert('Anket eklenirken bir hata oluştu.');
-    }
+  const dateTimePattern = /^\d{4}-\d{2}-\d{2} \d{2}\.\d{2}$/;
+  if (!dateTimePattern.test(expiry)) {
+    Alert.alert('Hata', 'Tarih ve saat formatı yyyy-mm-dd / hh.mm olmalıdır.');
+    return;
+  }
+
+  const newSurvey = {
+    question,
+    options,
+    votes: options.map(() => 0),
+    expiry,
+    createdBy: userName,
+    createdAt: firestore.FieldValue.serverTimestamp(),
   };
 
-  const handleConfirmCustomDate = () => {
-    if (!tempDate || !tempTime) {
-      alert('Lütfen tarih ve saat girin.');
-      return;
-    }
-    setExpiry(`${tempDate} ${tempTime}`);
-    setShowCustomPicker(false);
-  };
+  try {
+    const docRef = await firestore()
+      .collection('rooms')
+      .doc(roomCode)
+      .collection('surveys')
+      .add(newSurvey);
+
+    const addedSurvey = await docRef.get();
+    setSurveys(prev => [...prev, { id: docRef.id, ...addedSurvey.data() }]);
+
+    setQuestion('');
+    setOptions(['']); 
+    setExpiry('');
+
+  } catch (error) {
+    console.error('Anket eklenirken hata:', error);
+    Alert.alert('Hata', 'Anket eklenirken bir hata oluştu.');
+  }
+};
+
+
+const handleConfirmCustomDate = () => {
+  if (!tempDate || !tempTime) {
+    Alert.alert('Hata', 'Lütfen tarih ve saat girin.');
+    return;
+  }
+
+  const expiryValue = `${tempDate} ${tempTime}`;
+  const dateTimePattern = /^\d{4}-\d{2}-\d{2} \d{2}\.\d{2}$/;
+  if (!dateTimePattern.test(expiryValue)) {
+    Alert.alert('Hata', 'Tarih ve saat formatı yyyy-mm-dd hh.mm olmalıdır.');
+    return;
+  }
+
+  setExpiry(expiryValue);
+  setShowCustomPicker(false);
+};
+
 
   return (
     <View>
-      {/* Ana modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalBackground}>
           <View style={styles.modalBox}>
@@ -153,7 +175,6 @@ const AddSurvey = ({ setSurveys, surveys }) => {
         </View>
       </Modal>
 
-      {/* Custom tarih-saat seçici */}
       <Modal visible={showCustomPicker} transparent animationType="slide">
         <View style={styles.dateModalBackground}>
           <View style={styles.dateModalBox}>

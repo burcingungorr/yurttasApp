@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Title from '../components/Title';
-import { View, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Text } from 'react-native';
+import { View, ScrollView, StyleSheet, ActivityIndicator,  } from 'react-native';
 import Tasks from '../components/HomeScreenComponents/Tasks';
 import CalendarComponent from '../components/HomeScreenComponents/Calender';
 
 const HomeScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [loading, setLoading] = useState(true);  // Başlangıçta loading true
+  const [loading, setLoading] = useState(true);  
 
-  // Örnek: sayfa açılırken veri yükleniyormuş gibi simülasyon
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000); // 1 saniye loading
+    const timer = setTimeout(() => setLoading(false), 1000); 
     return () => clearTimeout(timer);
   }, []);
 

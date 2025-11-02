@@ -25,7 +25,9 @@ const avatars = [
 
 const AvatarSelector = () => {
   const currentUserId = useSelector(state => state.username.uid); 
-  const [selectedAvatar, setSelectedAvatar] = useState(avatars[6].source);
+const [selectedAvatar, setSelectedAvatar] = useState(
+  avatars.find(a => a.name === 'default.png').source
+);
   const [isSelectorVisible, setSelectorVisible] = useState(false);
 
   useEffect(() => {

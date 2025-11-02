@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Alert, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
@@ -8,6 +8,7 @@ import LogOut from './LogOut';
 import Users from './Users';
 import { clearUser } from '../../redux/usernameSlice';
 import { clearRoom } from '../../redux/roomSlice';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -33,7 +34,6 @@ const Settings = ({ setIsLoggedIn }) => {
 
   const handleDeleteFromRoom = async () => {
     try {
-      // Kullanıcının roommates koleksiyonundan kaydını sil
       const snapshot = await firestore()
         .collection('rooms')
         .doc(roomCode)
@@ -45,7 +45,6 @@ const Settings = ({ setIsLoggedIn }) => {
       snapshot.forEach(doc => batch.delete(doc.ref));
       await batch.commit();
 
-      // Redux state'i temizle
       dispatch(clearUser());
       dispatch(clearRoom());
 
@@ -69,7 +68,6 @@ const Settings = ({ setIsLoggedIn }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Settings Button */}
       <TouchableOpacity
         style={styles.settingsButton}
         onPress={() => setModalVisible(true)}
@@ -78,7 +76,6 @@ const Settings = ({ setIsLoggedIn }) => {
         <Icon name="cog-outline" size={30} color="white" />
       </TouchableOpacity>
 
-      {/* Settings Modal */}
       <Modal
         isVisible={modalVisible}
         animationIn="slideInLeft"
@@ -87,7 +84,6 @@ const Settings = ({ setIsLoggedIn }) => {
         style={styles.modalWrapper}
       >
         <View style={styles.modalContent}>
-          {/* Close Button */}
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => setModalVisible(false)}
@@ -96,14 +92,11 @@ const Settings = ({ setIsLoggedIn }) => {
             <Text style={styles.closeButtonText}>×</Text>
           </TouchableOpacity>
 
-          {/* Modal Header */}
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Ayarlar</Text>
           </View>
 
-          {/* Content Area */}
           <View style={styles.contentArea}>
-            {/* Oda Adı Kartı */}
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Icon name="home" size={22} color="#007AFF" />
@@ -116,7 +109,6 @@ const Settings = ({ setIsLoggedIn }) => {
 
             <View style={styles.divider} />
 
-            {/* Oda Kodu Kartı */}
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Icon name="key" size={22} color="#007AFF" />
@@ -129,7 +121,6 @@ const Settings = ({ setIsLoggedIn }) => {
 
             <View style={styles.divider} />
 
-            {/* Kullanıcılar Kartı */}
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Icon name="account-group" size={22} color="#007AFF" />
@@ -140,10 +131,8 @@ const Settings = ({ setIsLoggedIn }) => {
               </View>
             </View>
 
-            {/* Boş alan: butonları alta itmek için */}
             <View style={{ flex: 1 }} />
 
-            {/* LogOut ve Odadan Kayıt Sil butonları */}
             <LogOut setIsLoggedIn={setIsLoggedIn} />
 
             <TouchableOpacity
